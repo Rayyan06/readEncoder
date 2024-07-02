@@ -42,6 +42,13 @@ void transmitByte(uint8_t data)
 }
 
 /* Here are a bunch of useful printing commands */
+void printByte(uint8_t byte)
+{
+    /* Converts a byte to a string of decimal text, sends it */
+    transmitByte('0' + (byte / 100));       /* Hundreds */
+    transmitByte('0' + ((byte / 10) % 10)); /* Tens */
+    transmitByte('0' + (byte % 10));        /* Ones */
+}
 
 void printBinaryByte(uint8_t byte)
 {

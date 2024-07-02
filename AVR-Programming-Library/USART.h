@@ -23,6 +23,9 @@ void initUSART(void);
    data comes through.  We'll improve on this later. */
 void transmitByte(uint8_t data);
 
+void printByte(uint8_t byte);
+/* Prints a byte out as its 3-digit ascii equivalent */
+
 void printBinaryByte(uint8_t byte);
 
 /* Prints a string to the serial terminal */

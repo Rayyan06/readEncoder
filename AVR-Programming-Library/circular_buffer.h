@@ -3,10 +3,7 @@
 #include <stdint.h>
 #include "DataPoint.h"
 
-#define TX_BUFFER_SIZE 64
-
-
-
+#define TX_BUFFER_SIZE 4
 // Buffer for encoder data
 typedef struct
 {
@@ -15,9 +12,16 @@ typedef struct
     uint8_t tail;
 } circular_buffer_t;
 
-/* writes data to buffer */
-void buffer_write(volatile circular_buffer_t *buffer, DataPoint data);
+void initBuffer(volatile circular_buffer_t *buffer);
 
-/* Retrievs */
+/* returns true if the buffer is empty */
+uint8_t buffer_is_empty(volatile circular_buffer_t *buffer);
+
+
+/* writes data to buffer */
+uint8_t buffer_write(volatile circular_buffer_t *buffer, DataPoint data);
+
+/* Retrieves a datapoint from the buffer */
 DataPoint buffer_get(volatile circular_buffer_t *buffer);
+
 #endif

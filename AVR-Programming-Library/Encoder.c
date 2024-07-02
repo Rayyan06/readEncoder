@@ -1,8 +1,27 @@
 #include "Encoder.h"
 #include <avr/io.h>
 #include "USART.h"
+
+const uint8_t state_table[8][4] = {
+    // R_CW_NEXT 00
+    {R_CW_NEXT,
+     R_CW_BEGIN | DIR_CCW,
+     R_CW_FINAL | DIR_CW,
+     R_START /* Invalid*/},
+    // R_CW_BEGIN 01
+    {R_CW_NEXT | DIR_CW, R_CW_BEGIN, R_CW_FINAL /*Invalid*/, R_START | DIR_CCW},
+    {R_CW_NEXT | DIR_CCW, R_CW_BEGIN /* Invalid */, R_CW_FINAL, R_START | DIR_CW},    // R_CW_FINAL 02
+    {R_START /* Invalid */, R_CW_BEGIN | DIR_CW, R_CCW_BEGIN | DIR_CCW, R_START},     // R_START  03
+    {R_CCW_NEXT, R_CCW_FINAL | DIR_CCW, R_CCW_BEGIN | DIR_CW, R_START /* Invalid */}, // R_CCW_NEXT 04
+    {R_CCW_NEXT | DIR_CW, R_CCW_FINAL, R_CCW_BEGIN /* Invalid */,
+     R_START | DIR_CCW}, // R_CCW_FINAL 05
+    {R_CCW_NEXT | DIR_CCW, R_CCW_NEXT /* Invalid */, R_CCW_BEGIN,
+     R_START | DIR_CW},                   // R_CCW_BEGIN 06
+    {R_START, R_START, R_START, R_START}, // R_ILLEGAL 07
+};
+
 /* Initialization functions */
-static inline void initEncoder()
+inline void initEncoder()
 {
     ENCODER_PORT |=
         (1 << ENCODER_A_PIN) | (1 << ENCODER_B_PIN); /* enable pull-up resistors for encoder */
@@ -15,7 +34,7 @@ static inline void initEncoder()
 
 /* Encoder Functions */
 // TODO: Move all this to a dedicated file
-static inline uint8_t readEncoderPinState()
+uint8_t readEncoderPinState()
 {
     uint8_t pin_a = (PIND & (1 << ENCODER_A_PIN)) >> (ENCODER_A_PIN - 1);
     uint8_t pin_b = (PIND & (1 << ENCODER_B_PIN)) >> ENCODER_B_PIN;
@@ -28,31 +47,26 @@ static inline uint8_t readEncoderPinState()
     */
 }
 
-static inline void updateEncoderState(Encoder *encoder)
+void updateEncoderState(volatile Encoder *encoder)
 {
     encoder->state = state_table[encoder->state & 0x07][readEncoderPinState()];
 }
 
-static inline void updateEncoderPosition(Encoder *encoder)
+void updateEncoderPosition(volatile Encoder *encoder)
 {
     if (encoder->state & DIR_CW)
     {
-        printString("++");
         encoder->position++;
     }
     else if (encoder->state & DIR_CCW)
     {
-        printString("--");
         encoder->position--;
     }
 
-    printWord(encoder->position); // Print low byte
-    printString(" ");
-    printBinaryByte(encoder->state);
-    printString("\r\n");
+    // printWord(encoder->position); // Print low byte
 }
 
-void onEncoderInterrupt(Encoder *encoder)
+void onEncoderInterrupt(volatile Encoder *encoder)
 {
     updateEncoderState(encoder);
     updateEncoderPosition(encoder);
