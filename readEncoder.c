@@ -47,11 +47,16 @@ ISR(INT1_vect) /* on change of encoder pin B*/
 
 ISR(TIMER1_COMPA_vect)
 {
+    // Create a new data point with the current timer value and encoder position
     DataPoint datapoint = {COMPARE_VALUE, encoder.position & 0xFF};
+
+    // Add the data point to the transmission buffer
     buffer_write(&tx_buffer, datapoint);
 
+    // Enable the USART Data Register Empty Interrupt to start transmission
     UCSR0B |= (1 << UDRIE0);
 
+    // Toggle LED on PB5 to indicate timer interrupt occurred
     PORTB ^= (1 << PB5);
 }
 /* USART Data Register Empty Interrupt Service Routine */
@@ -60,7 +65,6 @@ ISR(USART_UDRE_vect)
     static DataPoint current_data;
 
     // Check if the buffer is not empty
-
     if (buffer_is_empty(&tx_buffer))
     {
         UCSR0B &= ~(1 << UDRIE0);
@@ -69,11 +73,12 @@ ISR(USART_UDRE_vect)
     // Read the data from the buffer, only do this once initially
     current_data = buffer_get(&tx_buffer);
 
-    // Send the high byte of position
-    // UDR0 = (uint8_t)(current_data.position >> 8);
-
-    // Send the low byte of positionnig
     UDR0 = (uint8_t)(current_data.position & 0xFF);
+    UDR0 = ((uint8_t)(current_data.position >> 8) & 0xFF);
+    UDR0 = (uint8_t)(current_data.time & 0xFF);
+    UDR0 = (uint8_t)((current_data.time >> 8) & 0xFF);
+    UDR0 = '\r';
+    UDR0 = '\n';
 
     // If buffer is empty after sending low byte, disable UDRE interrupt
     if (buffer_is_empty(&tx_buffer))
