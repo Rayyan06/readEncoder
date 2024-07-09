@@ -110,7 +110,6 @@ int main()
     while (1)
     {
         /* Nothing to do here */
-        _delay_ms(100);
     }
     return 0;
 }
