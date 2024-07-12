@@ -4,8 +4,8 @@
 #define DATAPOINT_H
 typedef struct
 {
-    uint16_t time;    /* In milliseconds */
-    int16_t position; /* In Ticks  */
+    int16_t position; /* In ticks */
+    uint16_t time;    /* In milliseconds  */
 } DataPoint;
 
 #endif
