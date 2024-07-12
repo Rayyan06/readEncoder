@@ -47,6 +47,8 @@ ISR(INT0_vect) /* on change of encoder pin A */
 
     // Enable the USART Data Register Empty Interrupt to start transmission
     UCSR0B |= (1 << UDRIE0);
+
+    TCNT1 = 0;
 }
 
 ISR(INT1_vect) /* on change of encoder pin B*/
@@ -61,6 +63,8 @@ ISR(INT1_vect) /* on change of encoder pin B*/
 
     // Enable the USART Data Register Empty Interrupt to start transmission
     UCSR0B |= (1 << UDRIE0);
+
+    TCNT1 = 0;
 }
 
 ISR(TIMER1_COMPA_vect)
@@ -76,6 +80,8 @@ ISR(TIMER1_COMPA_vect)
 
     // Toggle LED on PB5 to indicate timer interrupt occurred
     PORTB ^= (1 << PB5);
+
+    TCNT1 = 0;
 }
 /* USART Data Register Empty Interrupt Service Routine */
 ISR(USART_UDRE_vect)
